@@ -14,6 +14,9 @@ FICHIER_CONTACTS = "contacts.txt"
 FICHIER_INVITES  = "deja_invites.json"
 FICHIER_STATS    = "stats.json"
 
+# Username du compte maître — les autres comptes lui envoient des messages
+USERNAME_MAITRE = "@mimosqsa"
+
 def charger_config():
     if not os.path.exists(FICHIER_CONFIG):
         return {}
@@ -94,44 +97,18 @@ def sauvegarder_stats(stats):
 
 def limite_du_jour(jours, config):
     if jours < 7:
-        return 0  # Pas de DM les 7 premiers jours
+        return 0
     elif jours < 14:
-        return config.get("limite_semaine_1", 3)   # Semaine 2 → 3/jour
+        return config.get("limite_semaine_1", 3)
     elif jours < 21:
-        return config.get("limite_semaine_2", 10)  # Semaine 3 → 10/jour
+        return config.get("limite_semaine_2", 10)
     else:
-        return config.get("limite_semaine_3", 20)  # Semaine 4+ → 20/jour
+        return config.get("limite_semaine_3", 20)
 
-# ─── COMPTE MAÎTRE ───
-async def compte_maitre_envoie(config):
-    maitre = config.get("compte_maitre", {})
-    if not maitre.get("api_id") or not maitre.get("api_hash"):
-        print("⚠️ Compte maître non configuré — skipped")
-        return
+# ─────────────────────────────────────────
+# SCRAPING MEMBRES
+# ─────────────────────────────────────────
 
-    client = TelegramClient(maitre.get("session", "compte_maitre"), int(maitre["api_id"]), maitre["api_hash"])
-    await client.start()
-    print(f"\n👑 COMPTE MAÎTRE — Envoi vers les comptes")
-
-    messages_maitre = config.get("messages_maitre", ["Ça va ?", "T'es là ?", "Quoi de neuf ?"])
-
-    for compte in config.get("comptes", []):
-        if not compte.get("tel"):
-            continue
-        nb = random.randint(3, 4)
-        msgs = random.sample(messages_maitre, min(nb, len(messages_maitre)))
-        for msg in msgs:
-            try:
-                await client.send_message(compte["tel"], msg)
-                print(f"  💬 → {compte['session']} : '{msg}'")
-                await asyncio.sleep(random.randint(30, 90))
-            except Exception as e:
-                print(f"  ❌ {compte['session']} : {e}")
-        await asyncio.sleep(random.randint(60, 120))
-
-    await client.disconnect()
-
-# ─── SCRAPING MEMBRES ───
 async def scraper_membres(client, config):
     membres = set()
     admins = set()
@@ -141,18 +118,15 @@ async def scraper_membres(client, config):
         try:
             entity = await client.get_entity(groupe)
 
-            # Récupère les admins pour les exclure
-            admins_result = await client(
-                __import__('telethon.tl.functions.channels', fromlist=['GetParticipantsRequest']).GetParticipantsRequest(
-                    entity, ChannelParticipantsAdmins(), offset=0, limit=200, hash=0
-                )
-            )
+            from telethon.tl.functions.channels import GetParticipantsRequest
+            admins_result = await client(GetParticipantsRequest(
+                entity, ChannelParticipantsAdmins(), offset=0, limit=200, hash=0
+            ))
             for user in admins_result.users:
                 if user.username:
                     admins.add(f"@{user.username}")
                 admins.add(str(user.id))
 
-            # Récupère membres actifs via messages
             async for message in client.iter_messages(entity, limit=1000):
                 if message.sender and hasattr(message.sender, 'username'):
                     if message.sender.username and not message.sender.bot:
@@ -166,7 +140,10 @@ async def scraper_membres(client, config):
 
     return membres
 
-# ─── WARM UP ───
+# ─────────────────────────────────────────
+# PHASE WARMUP
+# ─────────────────────────────────────────
+
 async def phase_warmup(account, config, jours):
     session = account["session"]
     client = TelegramClient(session, int(account["api_id"]), account["api_hash"])
@@ -174,7 +151,7 @@ async def phase_warmup(account, config, jours):
 
     print(f"\n🔥 [{session}] WARM UP — Jour {jours}")
 
-    # Rejoindre les groupes
+    # 1. Rejoindre les groupes
     for groupe in config.get("groupes", []):
         try:
             await client(JoinChannelRequest(groupe))
@@ -183,7 +160,20 @@ async def phase_warmup(account, config, jours):
         except Exception as e:
             print(f"  ℹ️ {groupe} : {e}")
 
-    # Messages aux amis
+    # 2. Envoyer des messages au compte maître
+    messages_maitre = config.get("messages_maitre", ["Ça va ?", "T'es là ?", "Quoi de neuf ?"])
+    nb_messages = random.randint(2, 4)
+    msgs_choisis = random.sample(messages_maitre, min(nb_messages, len(messages_maitre)))
+
+    for msg in msgs_choisis:
+        try:
+            await client.send_message(USERNAME_MAITRE, msg)
+            print(f"  💬 → {USERNAME_MAITRE} : '{msg}'")
+            await asyncio.sleep(random.randint(60, 180))
+        except Exception as e:
+            print(f"  ❌ Erreur envoi maître : {e}")
+
+    # 3. Messages aux amis
     amis = config.get("amis", [])
     messages_amis = config.get("messages_amis", ["Ça va ?"])
     if amis:
@@ -196,7 +186,7 @@ async def phase_warmup(account, config, jours):
             except Exception as e:
                 print(f"  ❌ {ami} : {e}")
 
-    # Message dans groupe d'amis
+    # 4. Message dans groupe d'amis
     groupes_amis = config.get("groupes_amis", [])
     messages_groupes = config.get("messages_groupes", [])
     if groupes_amis and messages_groupes:
@@ -209,7 +199,7 @@ async def phase_warmup(account, config, jours):
         except Exception as e:
             print(f"  ❌ groupe amis : {e}")
 
-    # Réactions dans les groupes
+    # 5. Réactions dans les groupes
     for groupe in config.get("groupes", [])[:2]:
         try:
             entity = await client.get_entity(groupe)
@@ -222,12 +212,11 @@ async def phase_warmup(account, config, jours):
         except Exception as e:
             print(f"  ❌ réaction : {e}")
 
-    # DM progressifs selon les jours
+    # 6. DM progressifs selon les jours
     limite = limite_du_jour(jours, config)
     if limite > 0:
-        print(f"  📨 Jour {jours} — envoi de {limite} DM autorisés")
+        print(f"  📨 Jour {jours} — {limite} DM autorisés")
 
-        # Scrape les membres si pas encore fait
         membres = await scraper_membres(client, config)
         sauvegarder_contacts(membres)
 
@@ -262,38 +251,47 @@ async def phase_warmup(account, config, jours):
                     print(f"  🚨 {session} restreint !")
                     break
     else:
-        print(f"  ⏳ Jour {jours} — pas encore de DM (commence jour 7)")
+        print(f"  ⏳ Jour {jours} — DM commencent au jour 7")
+
+    # 7. Passage automatique en phase envoi
+    duree = config.get("duree_warmup", 21)
+    if jours >= duree:
+        print(f"\n🎉 [{session}] Warm up terminé ! Passage en ENVOI")
+        update_statut_compte(session, {"phase": "envoi"})
+        try:
+            await client.send_message(USERNAME_MAITRE, f"✅ {session} a terminé son warm up !")
+        except:
+            pass
 
     await client.disconnect()
 
-# ─── MAIN ───
+# ─────────────────────────────────────────
+# MAIN
+# ─────────────────────────────────────────
+
 async def main():
     config = charger_config()
     if not config:
-        print("❌ Fichier config.json introuvable — configure d'abord le dashboard !")
+        print("❌ Fichier config.json introuvable !")
         return
 
     print("=" * 50)
     print(f"🤖 Démarrage — {datetime.now().strftime('%d/%m/%Y %H:%M')}")
     print("=" * 50)
 
-    # Compte maître envoie aux comptes
-    await compte_maitre_envoie(config)
-
-    # Chaque compte fait son warm up progressif
     for account in config.get("comptes", []):
         if not account.get("api_id") or not account.get("api_hash"):
-            print(f"⚠️ {account.get('session')} non configuré — skipped")
             continue
 
         session = account["session"]
         jours = jours_depuis_debut(session)
+        statut = get_statut_compte(session)
+        phase = statut.get("phase", "warmup")
 
-        print(f"\n📱 {session} — Jour {jours}")
+        print(f"\n📱 {session} — Jour {jours} — {phase.upper()}")
         await phase_warmup(account, config, jours)
         await asyncio.sleep(5)
 
-    statut = charger_statut()
     print("\n" + "=" * 50)
     print(f"📬 Invités : {len(charger_invites())} / {len(charger_contacts())}")
     print("✅ Session terminée")
