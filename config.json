@@ -7,7 +7,13 @@
       "api_id": "36778134",
       "api_hash": "6a2970379ce0effe5e341787466e54a4"
     },
-    {"nom": "Compte 2", "session": "compte2", "tel": "", "api_id": "", "api_hash": ""},
+    {
+      "nom": "Compte 2",
+      "session": "compte2",
+      "tel": "+14782639757",
+      "api_id": "21088717",
+      "api_hash": "8250c2c1e8e8e79aea577a74df867adc"
+    },
     {"nom": "Compte 3", "session": "compte3", "tel": "", "api_id": "", "api_hash": ""},
     {"nom": "Compte 4", "session": "compte4", "tel": "", "api_id": "", "api_hash": ""},
     {"nom": "Compte 5", "session": "compte5", "tel": "", "api_id": "", "api_hash": ""},
@@ -45,19 +51,19 @@
     "https://t.me/FranceOFM"
   ],
   "amis": [],
-  "messages_invitation": ["Salut ! 👋\n\nJe voulais t'inviter sur mon canal Telegram.\n\nRejoins-nous ici : {canal}"],
-  "messages_amis": ["Ça va ?", "T'es là ?", "Tu fais quoi ce soir ?"],
+  "messages_invitation": ["Salut ! \ud83d\udc4b\n\nJe voulais t'inviter sur mon canal Telegram.\n\nRejoins-nous ici : {canal}"],
+  "messages_amis": ["Ca va ?", "T'es la ?", "Tu fais quoi ce soir ?"],
   "messages_groupes": ["Mets ton message ici"],
-  "messages_maitre": ["Ça va ?", "T'es dispo ?", "Quoi de neuf ?", "On se voit quand ?", "Tu fais quoi ce soir ?", "T'es là ?", "Yo !", "Réponds mec 😄", "Ça fait longtemps dis donc", "Tu dors ou quoi ?"],
+  "messages_maitre": ["Ca va ?", "T'es dispo ?", "Quoi de neuf ?", "On se voit quand ?", "Tu fais quoi ce soir ?", "T'es la ?", "Yo !", "Reponds mec", "Ca fait longtemps dis donc", "Tu dors ou quoi ?"],
   "messages_relance_pas_vu": [
-    "Hé ! Tu as vu mon message ? 👀",
-    "Au cas où t'aurais pas vu → {canal}",
-    "Yo, t'as loupé ça 👉 {canal}"
+    "He ! Tu as vu mon message ?",
+    "Au cas ou t'aurais pas vu -> {canal}",
+    "Yo, t'as loupe ca -> {canal}"
   ],
   "messages_relance_vu": [
-    "Toujours intéressé ? → {canal}",
-    "Hésite pas à rejoindre ! {canal}",
-    "C'est gratuit, ça vaut le coup d'œil → {canal}"
+    "Toujours interesse ? -> {canal}",
+    "Hesite pas a rejoindre ! {canal}",
+    "C'est gratuit, ca vaut le coup d'oeil -> {canal}"
   ],
   "canal_lien": "https://t.me/TON_CANAL",
   "mon_username": "@mimosqsa",
