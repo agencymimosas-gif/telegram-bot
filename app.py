@@ -28,6 +28,18 @@ DEFAULT_CONFIG = {
     "messages_amis": ["Ça va ?", "T'es là ?", "Tu fais quoi ce soir ?"],
     "messages_groupes": ["Mets ton message ici"],
     "messages_maitre": ["Ça va ?", "T'es dispo ?", "Quoi de neuf ?", "On se voit quand ?", "Tu fais quoi ce soir ?"],
+    "messages_relance_pas_vu": [
+        "Hé ! Tu as vu mon message ? 👀",
+        "Yo, t'as loupé ça 👉 {canal}",
+        "Au cas où t'aurais pas vu → {canal}",
+        "Je voulais juste m'assurer que t'avais vu ça → {canal}"
+    ],
+    "messages_relance_vu": [
+        "Tu as eu le temps de regarder ? {canal}",
+        "Toujours intéressé ? → {canal}",
+        "Hésite pas à rejoindre si t'as pas encore eu le temps ! {canal}",
+        "C'est gratuit, ça vaut le coup d'œil → {canal}"
+    ],
     "canal_lien": "https://t.me/TON_CANAL",
     "mon_username": "@tonusername",
     "duree_warmup": 21,
@@ -429,6 +441,18 @@ HTML = """
         <div id="msgs-maitre"></div>
         <button class="btn-add" onclick="ajouterMessage('maitre')">+ Ajouter</button>
 
+        <hr class="divider">
+        <div class="section-title">🔄 Relance — Message pas vu (après 7 jours)</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:12px;">Envoyé si la personne n'a pas ouvert ton message après 7 jours. Utilise {canal} pour le lien.</div>
+        <div id="msgs-relance-pas-vu"></div>
+        <button class="btn-add" onclick="ajouterMessage('relance_pas_vu')">+ Ajouter</button>
+
+        <hr class="divider">
+        <div class="section-title">👁️ Relance — Message vu sans réponse (après 7 jours)</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:12px;">Envoyé si la personne a lu ton message mais n'a pas répondu après 7 jours. Utilise {canal} pour le lien.</div>
+        <div id="msgs-relance-vu"></div>
+        <button class="btn-add" onclick="ajouterMessage('relance_vu')">+ Ajouter</button>
+
         <div class="controls">
             <button class="btn-save-main" onclick="sauvegarderMessages()">💾 Sauvegarder</button>
         </div>
@@ -575,6 +599,14 @@ function envoyerReponse(username) {
         renderCRM('tous');
     });
 }
+
+function showPage(name, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    if (btn) btn.classList.add('active');
+    if (name === 'comptes') renderComptes();
+    if (name === 'crm') renderCRM('tous');
     if (name === 'groupes') renderGroupes();
     if (name === 'amis') renderAmis();
     if (name === 'messages') renderMessages();
@@ -709,6 +741,8 @@ function renderMessages() {
     renderMsgSection('msgs-amis', 'messages_amis');
     renderMsgSection('msgs-groupes', 'messages_groupes');
     renderMsgSection('msgs-maitre', 'messages_maitre');
+    renderMsgSection('msgs-relance-pas-vu', 'messages_relance_pas_vu');
+    renderMsgSection('msgs-relance-vu', 'messages_relance_vu');
 }
 function ajouterMessage(key) {
     const k = 'messages_' + key;
@@ -716,12 +750,11 @@ function ajouterMessage(key) {
     config[k].push('Nouveau message...');
     renderMessages();
 }
-function supprimerMessage(key, i) {
     config['messages_' + key].splice(i, 1);
     renderMessages();
 }
 function sauvegarderMessages() {
-    ['invitation', 'amis', 'groupes', 'maitre'].forEach(key => {
+    ['invitation', 'amis', 'groupes', 'maitre', 'relance_pas_vu', 'relance_vu'].forEach(key => {
         const k = 'messages_' + key;
         config[k] = (config[k] || []).map((_, i) => {
             const el = document.getElementById(`m_${k}_${i}`);
