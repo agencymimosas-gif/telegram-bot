@@ -606,25 +606,15 @@ function showPage(name, btn) {
     document.getElementById('page-' + name).classList.add('active');
     if (btn) btn.classList.add('active');
 
-    // Si config pas encore chargé on attend
-    if (!config.comptes && name !== 'dashboard') {
-        fetch('/api/stats').then(r => r.json()).then(data => {
-            config = data.config || {};
-            if (name === 'comptes') renderComptes();
-            if (name === 'crm') renderCRM('tous');
-            if (name === 'groupes') renderGroupes();
-            if (name === 'amis') renderAmis();
-            if (name === 'messages') renderMessages();
-            if (name === 'parametres') renderParametres();
-        });
-    } else {
+    fetch('/api/stats').then(r => r.json()).then(data => {
+        config = data.config || {};
         if (name === 'comptes') renderComptes();
         if (name === 'crm') renderCRM('tous');
         if (name === 'groupes') renderGroupes();
         if (name === 'amis') renderAmis();
         if (name === 'messages') renderMessages();
         if (name === 'parametres') renderParametres();
-    }
+    });
 }
 
 function showToast(msg, type='success') {
