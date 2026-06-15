@@ -33,16 +33,37 @@
     "tel": "+12724415603",
     "session": "compte_maitre"
   },
-  "groupes": [],
+  "groupes": [
+    "https://t.me/+WVdLZnUpgtpkNDM6",
+    "https://t.me/OFMPromote",
+    "https://t.me/ofmhispanic",
+    "https://t.me/ofmva_fr",
+    "https://t.me/ofmanagementgroupe",
+    "https://t.me/ofmtrade",
+    "https://t.me/ofm_france_network",
+    "https://t.me/jobonlinevas",
+    "https://t.me/FranceOFM"
+  ],
   "amis": [],
   "messages_invitation": ["Salut ! 👋\n\nJe voulais t'inviter sur mon canal Telegram.\n\nRejoins-nous ici : {canal}"],
   "messages_amis": ["Ça va ?", "T'es là ?", "Tu fais quoi ce soir ?"],
   "messages_groupes": ["Mets ton message ici"],
   "messages_maitre": ["Ça va ?", "T'es dispo ?", "Quoi de neuf ?", "On se voit quand ?", "Tu fais quoi ce soir ?", "T'es là ?", "Yo !", "Réponds mec 😄", "Ça fait longtemps dis donc", "Tu dors ou quoi ?"],
+  "messages_relance_pas_vu": [
+    "Hé ! Tu as vu mon message ? 👀",
+    "Au cas où t'aurais pas vu → {canal}",
+    "Yo, t'as loupé ça 👉 {canal}"
+  ],
+  "messages_relance_vu": [
+    "Toujours intéressé ? → {canal}",
+    "Hésite pas à rejoindre ! {canal}",
+    "C'est gratuit, ça vaut le coup d'œil → {canal}"
+  ],
   "canal_lien": "https://t.me/TON_CANAL",
   "mon_username": "@mimosqsa",
   "duree_warmup": 21,
   "limite_semaine_1": 3,
-  "limite_semaine_2": 10,
-  "limite_semaine_3": 20
+  "limite_semaine_2": 5,
+  "limite_semaine_3": 10,
+  "limite_semaine_4": 15
 }
