@@ -1,0 +1,48 @@
+{
+  "comptes": [
+    {
+      "nom": "Compte 1",
+      "session": "compte1",
+      "tel": "+14093647648",
+      "api_id": "36778134",
+      "api_hash": "6a2970379ce0effe5e341787466e54a4"
+    },
+    {"nom": "Compte 2", "session": "compte2", "tel": "", "api_id": "", "api_hash": ""},
+    {"nom": "Compte 3", "session": "compte3", "tel": "", "api_id": "", "api_hash": ""},
+    {"nom": "Compte 4", "session": "compte4", "tel": "", "api_id": "", "api_hash": ""},
+    {"nom": "Compte 5", "session": "compte5", "tel": "", "api_id": "", "api_hash": ""},
+    {"nom": "Compte 6", "session": "compte6", "tel": "", "api_id": "", "api_hash": ""},
+    {"nom": "Compte 7", "session": "compte7", "tel": "", "api_id": "", "api_hash": ""},
+    {"nom": "Compte 8", "session": "compte8", "tel": "", "api_id": "", "api_hash": ""},
+    {"nom": "Compte 9", "session": "compte9", "tel": "", "api_id": "", "api_hash": ""},
+    {"nom": "Compte 10", "session": "compte10", "tel": "", "api_id": "", "api_hash": ""},
+    {"nom": "Compte 11", "session": "compte11", "tel": "", "api_id": "", "api_hash": ""},
+    {"nom": "Compte 12", "session": "compte12", "tel": "", "api_id": "", "api_hash": ""},
+    {"nom": "Compte 13", "session": "compte13", "tel": "", "api_id": "", "api_hash": ""},
+    {"nom": "Compte 14", "session": "compte14", "tel": "", "api_id": "", "api_hash": ""},
+    {"nom": "Compte 15", "session": "compte15", "tel": "", "api_id": "", "api_hash": ""},
+    {"nom": "Compte 16", "session": "compte16", "tel": "", "api_id": "", "api_hash": ""},
+    {"nom": "Compte 17", "session": "compte17", "tel": "", "api_id": "", "api_hash": ""},
+    {"nom": "Compte 18", "session": "compte18", "tel": "", "api_id": "", "api_hash": ""},
+    {"nom": "Compte 19", "session": "compte19", "tel": "", "api_id": "", "api_hash": ""},
+    {"nom": "Compte 20", "session": "compte20", "tel": "", "api_id": "", "api_hash": ""}
+  ],
+  "compte_maitre": {
+    "api_id": "36791407",
+    "api_hash": "8b7c1efdaa91429a22dd55f28ef83a05",
+    "tel": "+12724415603",
+    "session": "compte_maitre"
+  },
+  "groupes": [],
+  "amis": [],
+  "messages_invitation": ["Salut ! 👋\n\nJe voulais t'inviter sur mon canal Telegram.\n\nRejoins-nous ici : {canal}"],
+  "messages_amis": ["Ça va ?", "T'es là ?", "Tu fais quoi ce soir ?"],
+  "messages_groupes": ["Mets ton message ici"],
+  "messages_maitre": ["Ça va ?", "T'es dispo ?", "Quoi de neuf ?", "On se voit quand ?", "Tu fais quoi ce soir ?", "T'es là ?", "Yo !", "Réponds mec 😄", "Ça fait longtemps dis donc", "Tu dors ou quoi ?"],
+  "canal_lien": "https://t.me/TON_CANAL",
+  "mon_username": "@mimosqsa",
+  "duree_warmup": 21,
+  "limite_semaine_1": 3,
+  "limite_semaine_2": 10,
+  "limite_semaine_3": 20
+}
