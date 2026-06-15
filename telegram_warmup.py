@@ -169,7 +169,7 @@ async def phase_warmup(account, config, jours):
         try:
             await client.send_message(USERNAME_MAITRE, msg)
             print(f"  💬 → {USERNAME_MAITRE} : '{msg}'")
-            await asyncio.sleep(random.randint(60, 180))
+            await asyncio.sleep(random.randint(1800, 7200))
         except Exception as e:
             print(f"  ❌ Erreur envoi maître : {e}")
 
