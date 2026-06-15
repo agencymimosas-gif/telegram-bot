@@ -90,6 +90,18 @@ def jours_warmup(session):
         return (datetime.now() - debut).days
     return 0
 
+def charger_scores():
+    if not os.path.exists("scores.json"):
+        return {}
+    with open("scores.json", "r") as f:
+        return json.load(f)
+
+def score_compte(session):
+    scores = charger_scores()
+    if session in scores:
+        return scores[session]
+    return {"score": 100, "dernier_statut": "sain", "messages_ok": 0, "flood_wait": 0, "peer_flood": 0}
+
 HTML = """
 <!DOCTYPE html>
 <html lang="fr">
@@ -225,7 +237,26 @@ HTML = """
         .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
         .tag { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 100px; font-size: 11px; }
         .tag.maitre { background: rgba(124,106,247,0.15); color: var(--accent); margin-left: 8px; }
-        .empty { color: var(--text3); font-size: 13px; text-align: center; padding: 40px; }
+        .crm-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+        .crm-item.repondu { border-color: var(--green); }
+        .crm-item.relance { border-color: var(--yellow); }
+        .crm-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .crm-username { font-size: 14px; font-weight: 600; color: var(--accent); font-family: 'JetBrains Mono', monospace; flex: 1; }
+        .crm-statut { font-size: 11px; padding: 3px 8px; border-radius: 100px; }
+        .crm-statut.invite { background: rgba(100,116,139,0.15); color: var(--text3); }
+        .crm-statut.vu { background: rgba(59,130,246,0.15); color: var(--blue); }
+        .crm-statut.repondu { background: rgba(34,197,94,0.15); color: var(--green); }
+        .crm-statut.relance { background: rgba(245,158,11,0.15); color: var(--yellow); }
+        .crm-date { font-size: 11px; color: var(--text3); }
+        .crm-message { background: var(--surface2); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--text2); margin-bottom: 10px; border-left: 3px solid var(--green); }
+        .crm-reply { display: flex; gap: 8px; margin-top: 10px; }
+        .crm-reply-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--text); font-size: 13px; font-family: 'Inter', sans-serif; }
+        .crm-reply-input:focus { outline: none; border-color: var(--accent); }
+        .crm-reply-btn { padding: 8px 16px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .crm-filters { display: flex; gap: 8px; margin-bottom: 20px; }
+        .crm-filter { padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); }
+        .crm-filter.active { background: rgba(124,106,247,0.15); border-color: var(--accent); color: var(--accent); }
+        .crm-empty { text-align: center; padding: 60px; color: var(--text3); font-size: 14px; }
 
         /* PAGINATION COMPTES */
         .comptes-pages { display: flex; gap: 8px; margin-bottom: 16px; }
@@ -244,10 +275,11 @@ HTML = """
         </div>
     </div>
     <button class="nav-item active" onclick="showPage('dashboard', this)"><span class="nav-icon">📊</span> Dashboard</button>
+    <button class="nav-item" onclick="showPage('crm', this)"><span class="nav-icon">💬</span> CRM <span id="crm-badge" style="background:var(--red);color:white;font-size:10px;padding:2px 6px;border-radius:100px;margin-left:4px;display:none;">0</span></button>
     <button class="nav-item" onclick="showPage('comptes', this)"><span class="nav-icon">👤</span> Comptes</button>
     <button class="nav-item" onclick="showPage('groupes', this)"><span class="nav-icon">👥</span> Groupes</button>
     <button class="nav-item" onclick="showPage('amis', this)"><span class="nav-icon">🤝</span> Amis warmup</button>
-    <button class="nav-item" onclick="showPage('messages', this)"><span class="nav-icon">💬</span> Messages</button>
+    <button class="nav-item" onclick="showPage('messages', this)"><span class="nav-icon">✉️</span> Messages</button>
     <button class="nav-item" onclick="showPage('parametres', this)"><span class="nav-icon">⚙️</span> Paramètres</button>
     <div class="sidebar-bottom">
         <div class="status-pill">
@@ -302,6 +334,22 @@ HTML = """
             <button class="btn btn-stop" onclick="stopBot()">■ Arrêter</button>
             <button class="btn btn-secondary" onclick="refresh()">↻ Actualiser</button>
         </div>
+    </div>
+
+    <!-- CRM -->
+    <div class="page" id="page-crm">
+        <div class="page-title">CRM — Conversations</div>
+        <div class="page-sub">Toutes les réponses reçues — réponds directement depuis ici</div>
+
+        <div class="crm-filters">
+            <button class="crm-filter active" onclick="filtrerCRM('tous', this)">Tous</button>
+            <button class="crm-filter" onclick="filtrerCRM('repondu', this)">💬 Réponses</button>
+            <button class="crm-filter" onclick="filtrerCRM('vu', this)">👁️ Vus</button>
+            <button class="crm-filter" onclick="filtrerCRM('invite', this)">📨 Invités</button>
+            <button class="crm-filter" onclick="filtrerCRM('relance', this)">🔄 Relancés</button>
+        </div>
+
+        <div id="crm-list"><div class="crm-empty">Aucune conversation pour l'instant<br><br>Lance le bot pour commencer à inviter des personnes !</div></div>
     </div>
 
     <!-- COMPTES -->
@@ -450,7 +498,83 @@ function showPage(name, btn) {
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById('page-' + name).classList.add('active');
     if (btn) btn.classList.add('active');
-    if (name === 'comptes') renderComptes();
+    if (name === 'crm') renderCRM('tous');
+
+function filtrerCRM(filtre, btn) {
+    document.querySelectorAll('.crm-filter').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderCRM(filtre);
+}
+
+function renderCRM(filtre) {
+    fetch('/api/crm').then(r => r.json()).then(data => {
+        const list = document.getElementById('crm-list');
+        let items = Object.values(data);
+
+        if (filtre !== 'tous') {
+            items = items.filter(c => c.statut === filtre);
+        }
+
+        // Trier : répondus en premier
+        items.sort((a, b) => {
+            if (a.repondu && !b.repondu) return -1;
+            if (!a.repondu && b.repondu) return 1;
+            return new Date(b.date_invitation) - new Date(a.date_invitation);
+        });
+
+        if (items.length === 0) {
+            list.innerHTML = '<div class="crm-empty">Aucune conversation dans cette catégorie</div>';
+            return;
+        }
+
+        list.innerHTML = items.map(c => {
+            const statutLabel = {
+                'invite': '📨 Invité',
+                'vu': '👁️ Vu',
+                'repondu': '💬 A répondu',
+                'relance': '🔄 Relancé'
+            }[c.statut] || c.statut;
+
+            const date = new Date(c.date_invitation).toLocaleDateString('fr-FR');
+            const msgs = (c.messages_recus || []).map(m =>
+                `<div class="crm-message">💬 ${m.texte}</div>`
+            ).join('');
+
+            const replyBox = c.repondu ? `
+                <div class="crm-reply">
+                    <input class="crm-reply-input" id="reply-${c.username}" placeholder="Répondre à ${c.username}..." />
+                    <button class="crm-reply-btn" onclick="envoyerReponse('${c.username}')">Envoyer</button>
+                </div>` : '';
+
+            return `<div class="crm-item ${c.statut}">
+                <div class="crm-header">
+                    <div class="crm-username">${c.username}</div>
+                    <span class="crm-statut ${c.statut}">${statutLabel}</span>
+                    <div class="crm-date">${date}</div>
+                    ${c.nb_relances > 0 ? `<span style="font-size:11px;color:var(--yellow);">🔄 ${c.nb_relances} relance(s)</span>` : ''}
+                </div>
+                ${msgs}
+                ${replyBox}
+            </div>`;
+        }).join('');
+    });
+}
+
+function envoyerReponse(username) {
+    const input = document.getElementById('reply-' + username);
+    const message = input.value.trim();
+    if (!message) return;
+
+    fetch('/api/repondre', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({username, message})
+    }).then(r => r.json()).then(d => {
+        showToast(d.message || '✅ Message envoyé !');
+        input.value = '';
+        renderCRM('tous');
+    });
+}
     if (name === 'groupes') renderGroupes();
     if (name === 'amis') renderAmis();
     if (name === 'messages') renderMessages();
@@ -650,7 +774,17 @@ function refresh() {
         const actifs = (data.comptes || []).filter(c => c.configured).length;
         document.getElementById('comptes-actifs').textContent = actifs + '/20';
 
-        const dot = document.getElementById('statusDot');
+        // Badge CRM
+        fetch('/api/crm').then(r => r.json()).then(crm => {
+            const reponses = Object.values(crm).filter(c => c.repondu).length;
+            const badge = document.getElementById('crm-badge');
+            if (reponses > 0) {
+                badge.textContent = reponses;
+                badge.style.display = 'inline';
+            } else {
+                badge.style.display = 'none';
+            }
+        });
         if (data.running) { dot.classList.add('active'); document.getElementById('statusText').textContent = 'En cours'; }
         else { dot.classList.remove('active'); document.getElementById('statusText').textContent = 'Arrêté'; }
 
@@ -682,11 +816,24 @@ function refresh() {
                 const phaseLabel = !c.configured ? 'Non configuré' : c.phase === 'envoi' ? '📨 Envoi' : '🔥 Warm up';
                 const phaseClass = !c.configured ? 'inactive' : c.phase;
                 const joursLabel = !c.configured ? '' : c.phase === 'warmup' ? 'Jour ' + c.jours + '/21' : 'Actif';
+
+                // Score
+                let scoreEmoji = '🟢';
+                let scoreCouleur = 'var(--green)';
+                if (c.score) {
+                    if (c.score.dernier_statut === 'attention') { scoreEmoji = '🟡'; scoreCouleur = 'var(--yellow)'; }
+                    else if (c.score.dernier_statut === 'restreint') { scoreEmoji = '🔴'; scoreCouleur = 'var(--red)'; }
+                    else if (c.score.dernier_statut === 'banni') { scoreEmoji = '⚫'; scoreCouleur = 'var(--text3)'; }
+                }
+                const scoreVal = c.score ? c.score.score : 100;
+                const scoreTxt = c.configured ? `<div style="font-size:11px;color:${scoreCouleur};margin-bottom:6px;">${scoreEmoji} Trust ${scoreVal}/100</div>` : '';
+
                 return '<div class="compte-card' + (c.configured ? ' configured' : '') + '">' +
                     '<div class="compte-avatar' + (!c.configured ? ' inactive' : '') + '">👤</div>' +
                     '<div class="compte-nom">' + c.nom + '</div>' +
                     '<span class="compte-phase ' + phaseClass + '">' + phaseLabel + '</span>' +
                     (joursLabel ? '<div class="compte-jours">' + joursLabel + '</div>' : '') +
+                    scoreTxt +
                     '<a class="btn-tg' + (!c.configured ? ' disabled' : '') + '" href="' + telLink + '" target="_blank">' +
                     (c.configured ? '✈️ Ouvrir' : '⚙️ Config') + '</a>' +
                     '</div>';
@@ -724,7 +871,8 @@ def stats():
         "tel": c.get("tel", ""),
         "phase": statut_compte(c["session"]),
         "jours": jours_warmup(c["session"]),
-        "configured": bool(c.get("api_id") and c.get("api_hash"))
+        "configured": bool(c.get("api_id") and c.get("api_hash")),
+        "score": score_compte(c["session"])
     } for c in config.get("comptes", [])]
     return jsonify({
         "stats": stats_data,
@@ -736,6 +884,40 @@ def stats():
         "comptes": comptes_data,
         "config": config
     })
+
+@app.route('/api/crm')
+def get_crm():
+    if not os.path.exists("crm.json"):
+        return jsonify({})
+    with open("crm.json", "r") as f:
+        return jsonify(json.load(f))
+
+@app.route('/api/repondre', methods=['POST'])
+def repondre():
+    data = request.get_json()
+    username = data.get("username")
+    message = data.get("message")
+
+    if not username or not message:
+        return jsonify({"message": "❌ Données manquantes"})
+
+    # On met la réponse en file d'attente dans un fichier
+    queue_file = "reply_queue.json"
+    queue = []
+    if os.path.exists(queue_file):
+        with open(queue_file, "r") as f:
+            queue = json.load(f)
+
+    queue.append({
+        "username": username,
+        "message": message,
+        "date": datetime.now().isoformat()
+    })
+
+    with open(queue_file, "w") as f:
+        json.dump(queue, f, indent=2, ensure_ascii=False)
+
+    return jsonify({"message": f"✅ Message en file d'attente pour {username}"})
 
 @app.route('/api/config', methods=['POST'])
 def save_config():
