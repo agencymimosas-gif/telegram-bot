@@ -248,12 +248,12 @@ HTML = """
             <div class="logo-sub">20 comptes</div>
         </div>
     </div>
-    <button class="nav-item active" onclick="showPage('dashboard', this)"><span class="nav-icon">📊</span> Dashboard</button>
-    <button class="nav-item" onclick="showPage('crm', this)"><span class="nav-icon">💬</span> CRM <span id="crm-badge" style="background:var(--red);color:white;font-size:10px;padding:2px 6px;border-radius:100px;margin-left:4px;display:none;">0</span></button>
-    <button class="nav-item" onclick="showPage('comptes', this)"><span class="nav-icon">👤</span> Comptes</button>
-    <button class="nav-item" onclick="showPage('groupes', this)"><span class="nav-icon">👥</span> Groupes</button>
-    <button class="nav-item" onclick="showPage('messages', this)"><span class="nav-icon">✉️</span> Messages</button>
-    <button class="nav-item" onclick="showPage('parametres', this)"><span class="nav-icon">⚙️</span> Paramètres</button>
+    <button class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard', this)"><span class="nav-icon">📊</span> Dashboard</button>
+    <button class="nav-item" id="nav-crm" onclick="showPage('crm', this)"><span class="nav-icon">💬</span> CRM <span id="crm-badge" style="background:var(--red);color:white;font-size:10px;padding:2px 6px;border-radius:100px;margin-left:4px;display:none;">0</span></button>
+    <button class="nav-item" id="nav-comptes" onclick="showPage('comptes', this)"><span class="nav-icon">👤</span> Comptes</button>
+    <button class="nav-item" id="nav-groupes" onclick="showPage('groupes', this)"><span class="nav-icon">👥</span> Groupes</button>
+    <button class="nav-item" id="nav-messages" onclick="showPage('messages', this)"><span class="nav-icon">✉️</span> Messages</button>
+    <button class="nav-item" id="nav-parametres" onclick="showPage('parametres', this)"><span class="nav-icon">⚙️</span> Paramètres</button>
     <div class="sidebar-bottom">
         <div class="status-pill">
             <div class="status-dot" id="statusDot"></div>
@@ -383,7 +383,8 @@ const COMPTES_PAR_PAGE = 5;
 function showPage(name, btn) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.getElementById('page-' + name).classList.add('active');
+    const page = document.getElementById('page-' + name);
+    if (page) page.classList.add('active');
     if (btn) btn.classList.add('active');
     fetch('/api/stats').then(r => r.json()).then(data => {
         config = data.config || {};
