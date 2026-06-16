@@ -131,7 +131,7 @@ HTML = """
         .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
         .logo-text { font-size: 15px; font-weight: 700; }
         .logo-sub { font-size: 11px; color: var(--text3); }
-        .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; color: var(--text2); transition: all 0.15s; border: none; background: none; width: 100%; text-align: left; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; color: var(--text2); transition: all 0.15s; border: none; background: none; width: 100%; text-align: left; pointer-events: all; }
         .nav-item:hover { background: var(--surface2); color: var(--text); }
         .nav-item.active { background: rgba(124,106,247,0.15); color: var(--accent); font-weight: 600; }
         .nav-icon { font-size: 16px; width: 20px; text-align: center; }
